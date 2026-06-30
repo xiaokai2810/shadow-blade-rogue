@@ -27,6 +27,15 @@ http://127.0.0.1:4174/
 npm run check
 ```
 
+## 多 Agent 协作
+
+本项目使用产品、架构、开发、测试、美术、Review、迭代协调的多 Agent 流程推进。协作规则见：
+
+```text
+docs/MULTI_AGENT_WORKFLOW.md
+docs/GAME_AGENT_BACKLOG.md
+```
+
 ## 静态构建
 
 ```bash

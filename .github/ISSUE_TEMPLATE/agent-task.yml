@@ -1,0 +1,79 @@
+name: Agent task
+description: Track one multi-agent game development task
+title: "[Agent] "
+labels:
+  - agent-task
+body:
+  - type: dropdown
+    id: primary_agent
+    attributes:
+      label: Primary Agent
+      options:
+        - Product Agent
+        - Architecture Agent
+        - Development Agent
+        - Test Agent
+        - Art Agent
+        - Review Agent
+        - Iteration Coordinator
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Current Stage
+      options:
+        - Product
+        - Architecture
+        - Development
+        - Test
+        - Art
+        - Review
+        - Iteration
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What player value or release outcome should this task produce?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Include in-scope and out-of-scope items.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: List concrete checks that Test Agent or Review Agent can verify.
+    validations:
+      required: true
+  - type: textarea
+    id: handoff
+    attributes:
+      label: Handoff Packet
+      value: |
+        任务 ID:
+        当前阶段:
+        目标:
+        已完成:
+        关键文件:
+        验证方式:
+        风险/未决问题:
+        建议下一步:
+    validations:
+      required: false
+  - type: checkboxes
+    id: platform_impact
+    attributes:
+      label: Platform Impact
+      options:
+        - label: Web
+        - label: Douyin mini game
+        - label: Android APK
+        - label: GitHub Pages / server publish

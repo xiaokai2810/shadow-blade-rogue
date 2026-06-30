@@ -10,8 +10,8 @@
 - 抖音小游戏工程已完成基础结构检查。
 - 抖音审核资料草案在 `douyin-minigame/REVIEW_MATERIALS.md`。
 - 600x600 图标在 `douyin-minigame/assets/icon-600.png`。
-- 当前机器没有 GitHub CLI，也没有远端仓库信息，所以公网 GitHub Pages 发布动作尚未执行。
 - 抖音小游戏 AppID 已写入：`tt3daf4b12a3cb79d702`。
+- 多 Agent 协作规则在 `docs/MULTI_AGENT_WORKFLOW.md`，游戏迭代池在 `docs/GAME_AGENT_BACKLOG.md`。
 
 ## GitHub Pages
 
