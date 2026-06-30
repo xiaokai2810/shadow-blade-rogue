@@ -17,6 +17,8 @@
     var PI = Math.PI;
     var TWO_PI = PI * 2;
     var STORAGE_KEY = "shadow-blade-rogue-high-score";
+    var LEADERBOARD_KEY = "shadow-blade-rogue-leaderboard";
+    var SELECTED_CHARACTER_KEY = "shadow-blade-rogue-character";
     var ART_FILES = {
       hero: "assets/sprites/hero.png",
       ash: "assets/sprites/ash.png",
@@ -24,7 +26,248 @@
       iron: "assets/sprites/iron.png",
       boss: "assets/sprites/boss.png",
       blade: "assets/sprites/blade.png",
+      heroShadow: "assets/sprites/hero-shadow-v2.png",
+      heroThunder: "assets/sprites/hero-thunder-v2.png",
+      heroLotus: "assets/sprites/hero-lotus-v2.png",
+      enemyAsh: "assets/sprites/enemy-ash-v2.png",
+      enemySwift: "assets/sprites/enemy-swift-v2.png",
+      enemyFang: "assets/sprites/enemy-fang-v2.png",
+      enemySpitter: "assets/sprites/enemy-spitter-v2.png",
+      enemyWraith: "assets/sprites/enemy-wraith-v2.png",
+      enemyIron: "assets/sprites/enemy-iron-v2.png",
+      enemyWarden: "assets/sprites/enemy-warden-v2.png",
+      enemyBoss: "assets/sprites/enemy-boss-v2.png",
       title: "assets/generated/title-key-art.jpg"
+    };
+    var MENU_TABS = [
+      { id: "home", label: "出战" },
+      { id: "heroes", label: "角色" },
+      { id: "rank", label: "排行" },
+      { id: "codex", label: "图鉴" }
+    ];
+    var CHARACTERS = [
+      {
+        id: "blade",
+        name: "影刃",
+        title: "均衡斩影",
+        sprite: "heroShadow",
+        color: "#55dbc1",
+        accent: "#ffd36b",
+        desc: "挥斩、飞剑、旋刃均衡，适合稳定成型。",
+        perk: "断潮斩命中后有影痕追击。",
+        hpMax: 104,
+        speed: 150,
+        pickup: 86,
+        slashDamage: 24,
+        slashRange: 124,
+        slashCooldown: 0.62,
+        orbitCount: 1,
+        orbitDamage: 30,
+        projectileCount: 1,
+        projectileDamage: 18,
+        projectileCooldown: 1.15,
+        thunderDamage: 40,
+        thunderCooldown: 4.2,
+        regen: 0.65,
+        talent: "shadow"
+      },
+      {
+        id: "thunder",
+        name: "青雷使",
+        title: "连锁落雷",
+        sprite: "heroThunder",
+        color: "#78e7ff",
+        accent: "#c7f7ff",
+        desc: "血量较低，但落雷更频繁，会向周围敌人跳跃。",
+        perk: "青雷命中后追加一次连锁电弧。",
+        hpMax: 88,
+        speed: 158,
+        pickup: 82,
+        slashDamage: 20,
+        slashRange: 112,
+        slashCooldown: 0.68,
+        orbitCount: 0,
+        orbitDamage: 24,
+        projectileCount: 1,
+        projectileDamage: 15,
+        projectileCooldown: 1.02,
+        thunderDamage: 64,
+        thunderCooldown: 3.15,
+        regen: 0.42,
+        talent: "thunder"
+      },
+      {
+        id: "lotus",
+        name: "绯莲卫",
+        title: "守阵续航",
+        sprite: "heroLotus",
+        color: "#ff7d91",
+        accent: "#ffd36b",
+        desc: "速度较慢，生命和回复更高，定期释放莲华阵。",
+        perk: "莲华阵治疗自身，并灼伤近身敌群。",
+        hpMax: 132,
+        speed: 134,
+        pickup: 94,
+        slashDamage: 21,
+        slashRange: 116,
+        slashCooldown: 0.66,
+        orbitCount: 2,
+        orbitDamage: 26,
+        projectileCount: 1,
+        projectileDamage: 16,
+        projectileCooldown: 1.25,
+        thunderDamage: 32,
+        thunderCooldown: 4.6,
+        regen: 1.08,
+        talent: "lotus"
+      }
+    ];
+    var ENEMY_ORDER = ["ash", "swift", "fang", "spitter", "wraith", "iron", "warden", "boss"];
+    var ENEMY_TYPES = {
+      ash: {
+        name: "灰烬傀",
+        tier: "普通",
+        sprite: "enemyAsh",
+        behavior: "chase",
+        r: 13,
+        hp: 43,
+        hpScale: 0.55,
+        speed: 70,
+        speedScale: 0.1,
+        damage: 10,
+        xp: 3,
+        color: "#d64b39",
+        edge: "#ffbf66",
+        minAge: 0,
+        weight: 55,
+        desc: "基础追击单位，数量多，用来形成割草压力。"
+      },
+      swift: {
+        name: "疾镰影",
+        tier: "迅捷",
+        sprite: "enemySwift",
+        behavior: "weave",
+        r: 10,
+        hp: 28,
+        hpScale: 0.45,
+        speed: 112,
+        speedScale: 0.08,
+        damage: 9,
+        xp: 2,
+        color: "#e56c45",
+        edge: "#ffe082",
+        minAge: 35,
+        weight: 24,
+        desc: "高速蛇形靠近，逼迫玩家移动。"
+      },
+      fang: {
+        name: "赤牙冲锋者",
+        tier: "精英",
+        sprite: "enemyFang",
+        behavior: "charger",
+        r: 15,
+        hp: 68,
+        hpScale: 0.68,
+        speed: 84,
+        speedScale: 0.08,
+        damage: 17,
+        xp: 4,
+        color: "#ef5d42",
+        edge: "#ffd36b",
+        minAge: 62,
+        weight: 14,
+        desc: "蓄力后直线突进，命中很疼。"
+      },
+      spitter: {
+        name: "毒灯术士",
+        tier: "远程",
+        sprite: "enemySpitter",
+        behavior: "ranged",
+        r: 13,
+        hp: 54,
+        hpScale: 0.58,
+        speed: 58,
+        speedScale: 0.04,
+        damage: 8,
+        xp: 4,
+        color: "#9be36e",
+        edge: "#d9ff9d",
+        minAge: 78,
+        weight: 13,
+        desc: "保持距离并发射毒焰，考验走位。"
+      },
+      wraith: {
+        name: "夜魇",
+        tier: "迅捷",
+        sprite: "enemyWraith",
+        behavior: "phase",
+        r: 12,
+        hp: 46,
+        hpScale: 0.5,
+        speed: 126,
+        speedScale: 0.1,
+        damage: 12,
+        xp: 5,
+        color: "#6f6bff",
+        edge: "#c9c7ff",
+        minAge: 96,
+        weight: 11,
+        desc: "忽隐忽现，贴近时更难判断碰撞。"
+      },
+      iron: {
+        name: "铁甲傀",
+        tier: "重甲",
+        sprite: "enemyIron",
+        behavior: "chase",
+        r: 18,
+        hp: 112,
+        hpScale: 0.9,
+        speed: 52,
+        speedScale: 0.02,
+        damage: 15,
+        xp: 5,
+        armor: 0.18,
+        color: "#b33b2f",
+        edge: "#f9b15b",
+        minAge: 105,
+        weight: 18,
+        desc: "厚血高甲，适合检验单体伤害。"
+      },
+      warden: {
+        name: "骨盾卫",
+        tier: "护卫",
+        sprite: "enemyWarden",
+        behavior: "warden",
+        r: 20,
+        hp: 156,
+        hpScale: 1.1,
+        speed: 44,
+        speedScale: 0.02,
+        damage: 18,
+        xp: 7,
+        armor: 0.28,
+        color: "#84533f",
+        edge: "#ffe0a3",
+        minAge: 128,
+        weight: 9,
+        desc: "为附近怪物提供减伤光环，优先击杀收益高。"
+      },
+      boss: {
+        name: "魇花将",
+        tier: "Boss",
+        sprite: "enemyBoss",
+        behavior: "boss",
+        r: 34,
+        hp: 460,
+        hpScale: 8,
+        speed: 42,
+        speedScale: 0.08,
+        damage: 24,
+        xp: 18,
+        color: "#9c4cff",
+        edge: "#ffd36b",
+        desc: "周期释放震荡环并召唤随从。"
+      }
     };
 
     function clamp(value, min, max) {
@@ -88,12 +331,16 @@
       var gems;
       var projectiles;
       var effects;
+      var enemyProjectiles;
       var levelChoices;
       var elapsed;
       var kills;
       var spawnTimer;
       var bossTimer;
       var highScore = loadHighScore();
+      var leaderboard = loadLeaderboard();
+      var selectedCharacterId = loadSelectedCharacter();
+      var menuTab = "home";
       var titlePulse = 0;
       var sidebarSeen = false;
       var art = {};
@@ -123,6 +370,66 @@
         if (platform.setStorage) {
           platform.setStorage(STORAGE_KEY, JSON.stringify(score));
         }
+      }
+
+      function loadLeaderboard() {
+        var raw = null;
+        var list;
+        if (platform.getStorage) {
+          raw = platform.getStorage(LEADERBOARD_KEY);
+        }
+        if (!raw) {
+          return [];
+        }
+        try {
+          list = JSON.parse(raw);
+        } catch (err) {
+          return [];
+        }
+        if (!list || !list.length) {
+          return [];
+        }
+        return list.slice(0, 10);
+      }
+
+      function saveLeaderboard(record) {
+        leaderboard.push(record);
+        leaderboard.sort(function (a, b) {
+          return b.score - a.score || b.kills - a.kills || b.time - a.time;
+        });
+        leaderboard = leaderboard.slice(0, 10);
+        if (platform.setStorage) {
+          platform.setStorage(LEADERBOARD_KEY, JSON.stringify(leaderboard));
+        }
+      }
+
+      function loadSelectedCharacter() {
+        var raw = null;
+        if (platform.getStorage) {
+          raw = platform.getStorage(SELECTED_CHARACTER_KEY);
+        }
+        return getCharacter(raw).id;
+      }
+
+      function saveSelectedCharacter(id) {
+        selectedCharacterId = getCharacter(id).id;
+        if (platform.setStorage) {
+          platform.setStorage(SELECTED_CHARACTER_KEY, selectedCharacterId);
+        }
+      }
+
+      function getCharacter(id) {
+        var i;
+        for (i = 0; i < CHARACTERS.length; i += 1) {
+          if (CHARACTERS[i].id === id) {
+            return CHARACTERS[i];
+          }
+        }
+        return CHARACTERS[0];
+      }
+
+      function getEnemyConfig(type) {
+        return ENEMY_TYPES[type] || ENEMY_TYPES.ash;
       }
 
       function loadArtAssets() {
@@ -240,36 +547,50 @@
 
       function resetRun() {
         var sidebarBonus = false;
+        var hero = getCharacter(selectedCharacterId);
         if (platform.wasSidebarLaunch && platform.wasSidebarLaunch()) {
           sidebarBonus = true;
         }
 
         player = {
+          characterId: hero.id,
+          characterName: hero.name,
+          characterTitle: hero.title,
+          talent: hero.talent,
+          sprite: hero.sprite || "hero",
+          color: hero.color,
+          accent: hero.accent,
           x: width * 0.5,
           y: height * 0.58,
           r: 14,
-          hpMax: sidebarBonus ? 118 : 104,
-          hp: sidebarBonus ? 118 : 104,
-          speed: sidebarBonus ? 164 : 150,
-          pickup: sidebarBonus ? 118 : 86,
+          hpMax: hero.hpMax + (sidebarBonus ? 14 : 0),
+          hp: hero.hpMax + (sidebarBonus ? 14 : 0),
+          speed: hero.speed + (sidebarBonus ? 14 : 0),
+          pickup: hero.pickup + (sidebarBonus ? 32 : 0),
           xp: 0,
           xpNext: 22,
           level: 1,
-          slashDamage: 24,
-          slashRange: 124,
-          slashCooldown: 0.62,
+          slashDamage: hero.slashDamage,
+          slashRange: hero.slashRange,
+          slashCooldown: hero.slashCooldown,
           slashTimer: 0.2,
-          orbitCount: 1,
-          orbitDamage: 30,
+          orbitCount: hero.orbitCount,
+          orbitDamage: hero.orbitDamage,
           orbitRadius: 44,
-          projectileCount: 1,
-          projectileDamage: 18,
-          projectileCooldown: 1.15,
+          projectileCount: hero.projectileCount,
+          projectileDamage: hero.projectileDamage,
+          projectileCooldown: hero.projectileCooldown,
           projectileTimer: 0.65,
-          thunderDamage: 40,
-          thunderCooldown: 4.2,
+          thunderDamage: hero.thunderDamage,
+          thunderCooldown: hero.thunderCooldown,
           thunderTimer: 2.4,
-          regen: 0.65,
+          regen: hero.regen,
+          shadowEcho: hero.talent === "shadow" ? 0.42 : 0,
+          thunderChains: hero.talent === "thunder" ? 1 : 0,
+          lotusDamage: hero.talent === "lotus" ? 34 : 0,
+          lotusHeal: hero.talent === "lotus" ? 8 : 0,
+          lotusCooldown: hero.talent === "lotus" ? 5.8 : 999,
+          lotusTimer: hero.talent === "lotus" ? 2.4 : 999,
           invuln: 0,
           face: 1,
           sidebarBonus: sidebarBonus
@@ -278,6 +599,7 @@
         enemies = [];
         gems = [];
         projectiles = [];
+        enemyProjectiles = [];
         effects = [];
         levelChoices = [];
         elapsed = 0;
@@ -295,13 +617,19 @@
       }
 
       function finishRun(nextState) {
-        state = nextState;
-        saveHighScore({
+        var record = {
           score: currentScore(),
           time: Math.floor(elapsed),
           kills: kills,
-          level: player.level
-        });
+          level: player.level,
+          characterId: player.characterId,
+          characterName: player.characterName,
+          result: nextState,
+          date: Date.now ? Date.now() : new Date().getTime()
+        };
+        state = nextState;
+        saveHighScore(record);
+        saveLeaderboard(record);
       }
 
       function spawnEnemy(kind) {
@@ -310,78 +638,70 @@
         var x = side === 1 ? width + margin : side === 3 ? -margin : rand(-margin, width + margin);
         var y = side === 0 ? -margin : side === 2 ? height + margin : rand(70, height + margin);
         var age = elapsed || 0;
+        var type = kind === "boss" ? "boss" : chooseEnemyType(age);
+        var config = getEnemyConfig(type);
+        var hp = config.hp + age * config.hpScale;
+        var speed = config.speed + age * (config.speedScale || 0);
         var enemy;
 
-        if (kind === "boss") {
-          enemy = {
-            type: "boss",
-            x: x,
-            y: y,
-            r: 34,
-            hp: 460 + age * 8,
-            hpMax: 460 + age * 8,
-            speed: 42 + age * 0.08,
-            damage: 24,
-            xp: 18,
-            color: "#9c4cff",
-            edge: "#ffd36b",
-            orbitCd: 0,
-            touchCd: 0,
-            hit: 0
-          };
-        } else if (age > 105 && Math.random() < 0.18) {
-          enemy = {
-            type: "iron",
-            x: x,
-            y: y,
-            r: 18,
-            hp: 112 + age * 0.9,
-            hpMax: 112 + age * 0.9,
-            speed: 52,
-            damage: 15,
-            xp: 5,
-            color: "#b33b2f",
-            edge: "#f9b15b",
-            orbitCd: 0,
-            touchCd: 0,
-            hit: 0
-          };
-        } else if (age > 42 && Math.random() < 0.3) {
-          enemy = {
-            type: "swift",
-            x: x,
-            y: y,
-            r: 10,
-            hp: 27 + age * 0.45,
-            hpMax: 27 + age * 0.45,
-            speed: 112 + age * 0.08,
-            damage: 9,
-            xp: 2,
-            color: "#e56c45",
-            edge: "#ffe082",
-            orbitCd: 0,
-            touchCd: 0,
-            hit: 0
-          };
-        } else {
-          enemy = {
-            type: "ash",
-            x: x,
-            y: y,
-            r: 13,
-            hp: 43 + age * 0.55,
-            hpMax: 43 + age * 0.55,
-            speed: 70 + age * 0.1,
-            damage: 10,
-            xp: 3,
-            color: "#d64b39",
-            edge: "#ffbf66",
-            orbitCd: 0,
-            touchCd: 0,
-            hit: 0
-          };
-        }
+        enemy = {
+          type: type,
+          name: config.name,
+          behavior: config.behavior,
+          x: x,
+          y: y,
+          r: config.r,
+          hp: hp,
+          hpMax: hp,
+          speed: speed,
+          damage: config.damage,
+          xp: config.xp,
+          armor: config.armor || 0,
+          color: config.color,
+          edge: config.edge,
+          orbitCd: 0,
+          touchCd: 0,
+          actionCd: type === "boss" ? 3.2 : rand(0.7, 2.4),
+          chargeTime: 0,
+          chargeX: 0,
+          chargeY: 0,
+          phase: Math.random() * TWO_PI,
+          shielded: false,
+          hit: 0
+        };
         enemies.push(enemy);
+      }
+
+      function chooseEnemyType(age) {
+        var pool = [];
+        var total = 0;
+        var i;
+        var config;
+        var weight;
+        var roll;
+        for (i = 0; i < ENEMY_ORDER.length; i += 1) {
+          if (ENEMY_ORDER[i] === "boss") {
+            continue;
+          }
+          config = getEnemyConfig(ENEMY_ORDER[i]);
+          if (age < config.minAge) {
+            continue;
+          }
+          weight = config.weight + Math.min(18, Math.max(0, age - config.minAge) * 0.05);
+          if (config.behavior === "warden" && enemies.length < 10) {
+            weight *= 0.4;
+          }
+          total += weight;
+          pool.push({ type: ENEMY_ORDER[i], weight: weight });
+        }
+        roll = Math.random() * total;
+        for (i = 0; i < pool.length; i += 1) {
+          roll -= pool[i].weight;
+          if (roll <= 0) {
+            return pool[i].type;
+          }
+        }
+        return "ash";
       }
 
       function spawnWave(dt) {
@@ -417,6 +737,10 @@
         if (!enemy || enemy.dead) {
           return;
         }
+        amount = amount * (1 - (enemy.armor || 0));
+        if (enemy.shielded && enemy.type !== "warden") {
+          amount *= 0.72;
+        }
         enemy.hp -= amount;
         enemy.hit = 0.08;
         effects.push({
@@ -445,6 +769,38 @@
               maxLife: 0.75,
               color: "#ffd36b"
             });
+          }
+        }
+      }
+
+      function hasLivingEnemy(type) {
+        var i;
+        for (i = 0; i < enemies.length; i += 1) {
+          if (!enemies[i].dead && enemies[i].type === type) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function refreshEnemyShields() {
+        var i;
+        var j;
+        var enemy;
+        var warden;
+        for (i = 0; i < enemies.length; i += 1) {
+          enemies[i].shielded = false;
+        }
+        for (i = 0; i < enemies.length; i += 1) {
+          warden = enemies[i];
+          if (warden.dead || warden.type !== "warden") {
+            continue;
+          }
+          for (j = 0; j < enemies.length; j += 1) {
+            enemy = enemies[j];
+            if (!enemy.dead && enemy !== warden && dist(warden.x, warden.y, enemy.x, enemy.y) < 104) {
+              enemy.shielded = true;
+            }
           }
         }
       }
@@ -487,6 +843,7 @@
         var distance;
         var facing;
         var delta;
+        var hitCount = 0;
 
         effects.push({
           type: "slash",
@@ -512,6 +869,26 @@
           delta = Math.abs(Math.atan2(Math.sin(facing - angle), Math.cos(facing - angle)));
           if (delta < 1.35 || distance < 42) {
             hurtEnemy(enemy, player.slashDamage, "#fff0aa");
+            hitCount += 1;
+          }
+        }
+
+        if (player.talent === "shadow" && player.shadowEcho > 0 && hitCount > 0) {
+          effects.push({
+            type: "slash",
+            x: player.x,
+            y: player.y,
+            angle: angle + PI,
+            r: player.slashRange * 0.72,
+            life: 0.16,
+            maxLife: 0.16,
+            color: "#55dbc1"
+          });
+          for (i = 0; i < enemies.length; i += 1) {
+            enemy = enemies[i];
+            if (!enemy.dead && dist(player.x, player.y, enemy.x, enemy.y) < player.slashRange * 0.72 + enemy.r) {
+              hurtEnemy(enemy, player.slashDamage * player.shadowEcho, "#55dbc1");
+            }
           }
         }
       }
@@ -540,6 +917,8 @@
       function doThunder() {
         var target = nearestEnemy(9999);
         var i;
+        var chain;
+        var chainTarget;
         var enemy;
         if (!target) {
           return;
@@ -559,6 +938,78 @@
             hurtEnemy(enemy, player.thunderDamage, "#78e7ff");
           }
         }
+        for (chain = 0; chain < player.thunderChains; chain += 1) {
+          chainTarget = null;
+          for (i = 0; i < enemies.length; i += 1) {
+            enemy = enemies[i];
+            if (!enemy.dead && enemy !== target && dist(target.x, target.y, enemy.x, enemy.y) < 150 + chain * 18) {
+              chainTarget = enemy;
+              break;
+            }
+          }
+          if (chainTarget) {
+            effects.push({
+              type: "arc",
+              x: target.x,
+              y: target.y,
+              x2: chainTarget.x,
+              y2: chainTarget.y,
+              life: 0.28,
+              maxLife: 0.28,
+              color: "#c7f7ff"
+            });
+            hurtEnemy(chainTarget, player.thunderDamage * (0.58 + chain * 0.08), "#c7f7ff");
+          }
+        }
+      }
+
+      function doLotusPulse() {
+        var i;
+        var enemy;
+        var range = 88 + player.level * 1.5;
+        player.hp = Math.min(player.hpMax, player.hp + player.lotusHeal);
+        effects.push({
+          type: "lotus",
+          x: player.x,
+          y: player.y,
+          r: range,
+          life: 0.58,
+          maxLife: 0.58,
+          color: "#ff7d91"
+        });
+        for (i = 0; i < enemies.length; i += 1) {
+          enemy = enemies[i];
+          if (!enemy.dead && dist(player.x, player.y, enemy.x, enemy.y) < range + enemy.r) {
+            hurtEnemy(enemy, player.lotusDamage, "#ff7d91");
+          }
+        }
+      }
+
+      function fireEnemyShot(enemy) {
+        var normal = norm(player.x - enemy.x, player.y - enemy.y);
+        if (!normal.length) {
+          return;
+        }
+        enemyProjectiles.push({
+          x: enemy.x,
+          y: enemy.y,
+          vx: normal.x * 190,
+          vy: normal.y * 190,
+          r: enemy.type === "boss" ? 6 : 4,
+          life: enemy.type === "boss" ? 4.2 : 3.2,
+          damage: enemy.damage * (enemy.type === "boss" ? 0.78 : 0.7),
+          color: enemy.type === "boss" ? "#ffd36b" : "#9be36e"
+        });
+        effects.push({
+          type: "spark",
+          x: enemy.x,
+          y: enemy.y,
+          vx: normal.x * 12,
+          vy: normal.y * 12,
+          life: 0.24,
+          maxLife: 0.24,
+          color: enemy.type === "boss" ? "#ffd36b" : "#9be36e"
+        });
       }
 
       function updateRunning(dt) {
@@ -603,15 +1054,99 @@
           player.thunderTimer = player.thunderCooldown;
         }
 
+        player.lotusTimer -= dt;
+        if (player.lotusTimer <= 0) {
+          doLotusPulse();
+          player.lotusTimer = player.lotusCooldown;
+        }
+
+        refreshEnemyShields();
+
         for (i = enemies.length - 1; i >= 0; i -= 1) {
           enemy = enemies[i];
           if (enemy.dead) {
             enemies.splice(i, 1);
             continue;
           }
+          enemy.phase += dt * (enemy.type === "boss" ? 2.2 : 4.2);
           normal = norm(player.x - enemy.x, player.y - enemy.y);
-          enemy.x += normal.x * enemy.speed * dt;
-          enemy.y += normal.y * enemy.speed * dt;
+          enemy.actionCd = Math.max(0, enemy.actionCd - dt);
+          if (enemy.behavior === "charger" && enemy.chargeTime > 0) {
+            enemy.chargeTime -= dt;
+            enemy.x += enemy.chargeX * enemy.speed * 3.15 * dt;
+            enemy.y += enemy.chargeY * enemy.speed * 3.15 * dt;
+            if (Math.random() < 0.32) {
+              effects.push({
+                type: "spark",
+                x: enemy.x,
+                y: enemy.y,
+                vx: rand(-20, 20),
+                vy: rand(-20, 20),
+                life: 0.18,
+                maxLife: 0.18,
+                color: "#ffd36b"
+              });
+            }
+          } else if (enemy.behavior === "charger" && enemy.actionCd <= 0 && normal.length < 430) {
+            enemy.chargeTime = 0.44;
+            enemy.chargeX = normal.x;
+            enemy.chargeY = normal.y;
+            enemy.actionCd = 2.8 + Math.random() * 0.8;
+            effects.push({
+              type: "ring",
+              x: enemy.x,
+              y: enemy.y,
+              r: enemy.r,
+              life: 0.24,
+              maxLife: 0.24,
+              color: "#ffd36b"
+            });
+          } else if (enemy.behavior === "ranged") {
+            if (normal.length < 210) {
+              enemy.x -= normal.x * enemy.speed * 0.64 * dt;
+              enemy.y -= normal.y * enemy.speed * 0.64 * dt;
+            } else {
+              enemy.x += normal.x * enemy.speed * 0.55 * dt;
+              enemy.y += normal.y * enemy.speed * 0.55 * dt;
+            }
+            if (enemy.actionCd <= 0 && normal.length < 460) {
+              fireEnemyShot(enemy);
+              enemy.actionCd = 2.2 + Math.random() * 0.8;
+            }
+          } else if (enemy.behavior === "weave" || enemy.behavior === "phase") {
+            enemy.x += normal.x * enemy.speed * dt + -normal.y * Math.sin(enemy.phase) * (enemy.behavior === "phase" ? 32 : 18) * dt;
+            enemy.y += normal.y * enemy.speed * dt + normal.x * Math.sin(enemy.phase) * (enemy.behavior === "phase" ? 32 : 18) * dt;
+          } else if (enemy.behavior === "boss") {
+            enemy.x += normal.x * enemy.speed * dt;
+            enemy.y += normal.y * enemy.speed * dt;
+            if (enemy.actionCd <= 0) {
+              effects.push({
+                type: "bossPulse",
+                x: enemy.x,
+                y: enemy.y,
+                r: 34,
+                life: 0.68,
+                maxLife: 0.68,
+                color: "#ffd36b"
+              });
+              if (normal.length < 132 && player.invuln <= 0) {
+                player.hp -= enemy.damage * 0.85;
+                player.invuln = 0.24;
+              }
+              if (enemies.length < 80) {
+                spawnEnemy(Math.random() < 0.55 ? "normal" : "normal");
+              }
+              if (Math.random() < 0.55) {
+                fireEnemyShot(enemy);
+              }
+              enemy.actionCd = 5.2 + Math.random() * 1.6;
+            }
+          } else {
+            enemy.x += normal.x * enemy.speed * dt;
+            enemy.y += normal.y * enemy.speed * dt;
+          }
+          enemy.x = clamp(enemy.x, -70, width + 70);
+          enemy.y = clamp(enemy.y, 54, height + 70);
           enemy.orbitCd = Math.max(0, enemy.orbitCd - dt);
           enemy.touchCd = Math.max(0, enemy.touchCd - dt);
           enemy.hit = Math.max(0, enemy.hit - dt);
@@ -631,6 +1166,31 @@
                 color: "#ff7060"
               });
             }
+          }
+        }
+
+        for (i = enemyProjectiles.length - 1; i >= 0; i -= 1) {
+          projectile = enemyProjectiles[i];
+          projectile.life -= dt;
+          projectile.x += projectile.vx * dt;
+          projectile.y += projectile.vy * dt;
+          if (projectile.life <= 0 || projectile.x < -80 || projectile.x > width + 80 || projectile.y < -80 || projectile.y > height + 80) {
+            enemyProjectiles.splice(i, 1);
+            continue;
+          }
+          if (dist(projectile.x, projectile.y, player.x, player.y) < projectile.r + player.r && player.invuln <= 0) {
+            player.hp -= projectile.damage;
+            player.invuln = 0.2;
+            effects.push({
+              type: "ring",
+              x: player.x,
+              y: player.y,
+              r: 14,
+              life: 0.28,
+              maxLife: 0.28,
+              color: projectile.color
+            });
+            enemyProjectiles.splice(i, 1);
           }
         }
 
@@ -798,6 +1358,38 @@
             }
           }
         ];
+        if (player.talent === "shadow") {
+          pool.push({
+            id: "shadow-sigil",
+            name: "影痕回响",
+            text: "影刃追击更强，挥斩更利落",
+            apply: function () {
+              player.shadowEcho = Math.min(0.9, player.shadowEcho + 0.16);
+              player.slashCooldown = Math.max(0.34, player.slashCooldown * 0.92);
+            }
+          });
+        } else if (player.talent === "thunder") {
+          pool.push({
+            id: "chain-bolt",
+            name: "连锁雷文",
+            text: "落雷额外跳跃，并提升雷伤",
+            apply: function () {
+              player.thunderChains = Math.min(4, player.thunderChains + 1);
+              player.thunderDamage *= 1.18;
+            }
+          });
+        } else if (player.talent === "lotus") {
+          pool.push({
+            id: "lotus-field",
+            name: "绯莲盛放",
+            text: "莲华阵更频繁，治疗更高",
+            apply: function () {
+              player.lotusCooldown = Math.max(3.4, player.lotusCooldown * 0.86);
+              player.lotusDamage *= 1.18;
+              player.lotusHeal += 4;
+            }
+          });
+        }
         var selected = [];
         var candidate;
         while (selected.length < 3 && pool.length > 0) {
@@ -837,6 +1429,7 @@
         drawBackground();
         if (player) {
           drawGems();
+          drawEnemyProjectiles();
           drawProjectiles();
           drawEnemies();
           drawPlayer();
@@ -997,30 +1590,84 @@
         ctx.restore();
       }
 
+      function drawEnemyProjectiles() {
+        var projectile;
+        var i;
+        ctx.save();
+        for (i = 0; i < enemyProjectiles.length; i += 1) {
+          projectile = enemyProjectiles[i];
+          ctx.globalAlpha = 0.88;
+          ctx.fillStyle = projectile.color;
+          ctx.strokeStyle = "rgba(255,255,255,0.38)";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(projectile.x, projectile.y, projectile.r, 0, TWO_PI);
+          ctx.fill();
+          ctx.stroke();
+          ctx.globalAlpha = 0.24;
+          ctx.beginPath();
+          ctx.arc(projectile.x, projectile.y, projectile.r * 2.4, 0, TWO_PI);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
       function enemySpriteName(enemy) {
-        if (enemy.type === "boss") {
-          return "boss";
-        }
-        if (enemy.type === "iron") {
-          return "iron";
-        }
-        if (enemy.type === "swift") {
-          return "swift";
-        }
-        return "ash";
+        return getEnemyConfig(enemy.type).sprite || "ash";
       }
 
       function enemySpriteSize(enemy) {
         if (enemy.type === "boss") {
           return enemy.r * 4.45;
         }
-        if (enemy.type === "iron") {
+        if (enemy.type === "iron" || enemy.type === "warden") {
           return enemy.r * 4.8;
         }
-        if (enemy.type === "swift") {
+        if (enemy.type === "swift" || enemy.type === "wraith") {
           return enemy.r * 5.9;
         }
+        if (enemy.type === "fang") {
+          return enemy.r * 5.25;
+        }
         return enemy.r * 4.65;
+      }
+
+      function drawEnemyBadges(enemy, spriteSize) {
+        var pulse = 0.5 + Math.sin(enemy.phase) * 0.5;
+        ctx.save();
+        ctx.translate(enemy.x, enemy.y);
+        if (enemy.shielded || enemy.type === "warden") {
+          ctx.globalAlpha = enemy.type === "warden" ? 0.32 : 0.22;
+          ctx.strokeStyle = "#ffd36b";
+          ctx.lineWidth = enemy.type === "warden" ? 4 : 2;
+          ctx.beginPath();
+          ctx.arc(0, -enemy.r * 0.08, enemy.r * (1.7 + pulse * 0.12), 0, TWO_PI);
+          ctx.stroke();
+        }
+        if (enemy.type === "spitter") {
+          ctx.globalAlpha = 0.38;
+          ctx.fillStyle = "#9be36e";
+          ctx.beginPath();
+          ctx.arc(0, -spriteSize * 0.22, 5 + pulse * 3, 0, TWO_PI);
+          ctx.fill();
+        } else if (enemy.type === "fang") {
+          ctx.globalAlpha = enemy.chargeTime > 0 ? 0.9 : 0.42;
+          ctx.strokeStyle = "#ffd36b";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(-enemy.r * 0.8, -enemy.r * 0.8);
+          ctx.lineTo(0, -enemy.r * 1.45);
+          ctx.lineTo(enemy.r * 0.8, -enemy.r * 0.8);
+          ctx.stroke();
+        } else if (enemy.type === "wraith") {
+          ctx.globalAlpha = 0.18 + pulse * 0.18;
+          ctx.strokeStyle = "#c9c7ff";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(0, 0, enemy.r * 2.1, -PI * 0.2, PI * 1.15);
+          ctx.stroke();
+        }
+        ctx.restore();
       }
 
       function drawBossHealth(enemy, size) {
@@ -1045,10 +1692,11 @@
         for (i = 0; i < enemies.length; i += 1) {
           enemy = enemies[i];
           spriteName = enemySpriteName(enemy);
-          spriteSize = enemySpriteSize(enemy);
+          spriteSize = enemySpriteSize(enemy) * (1 + Math.sin(enemy.phase) * 0.025);
           flip = player && enemy.x > player.x;
           drawGroundShadow(enemy.x, enemy.y + enemy.r * 0.62, spriteSize * 0.52, enemy.r * 0.72, enemy.type === "boss" ? 0.32 : 0.22);
-          if (drawImageSprite(spriteName, enemy.x, enemy.y - enemy.r * 0.28, spriteSize, Math.sin(titlePulse * 6 + i) * 0.035, enemy.hit > 0 ? 1 : 0.96, flip)) {
+          drawEnemyBadges(enemy, spriteSize);
+          if (drawImageSprite(spriteName, enemy.x, enemy.y - enemy.r * 0.28 + Math.sin(enemy.phase) * 1.8, spriteSize, Math.sin(titlePulse * 6 + i) * 0.035, enemy.hit > 0 ? 1 : enemy.type === "wraith" ? 0.78 : 0.96, flip)) {
             if (enemy.hit > 0) {
               ctx.save();
               ctx.globalAlpha = 0.55;
@@ -1101,8 +1749,14 @@
         var heroSize = player.r * 5.55;
         drawGroundShadow(player.x, player.y + player.r * 0.78, heroSize * 0.54, player.r * 0.8, 0.3);
         ctx.save();
+        ctx.globalAlpha = 0.22;
+        ctx.strokeStyle = player.color;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, player.r * (2.0 + Math.sin(titlePulse * 3.2) * 0.16), 0, TWO_PI);
+        ctx.stroke();
         ctx.globalAlpha = player.invuln > 0 ? 0.65 : 1;
-        if (!drawImageSprite("hero", player.x, player.y - player.r * 0.55, heroSize, Math.sin(titlePulse * 5.5) * 0.025, player.invuln > 0 ? 0.65 : 1, player.face < 0)) {
+        if (!drawImageSprite(player.sprite || "hero", player.x, player.y - player.r * 0.55, heroSize, Math.sin(titlePulse * 5.5) * 0.025, player.invuln > 0 ? 0.65 : 1, player.face < 0)) {
           ctx.fillStyle = "#f6e7c8";
           ctx.strokeStyle = "#1b3931";
           ctx.lineWidth = 3;
@@ -1116,7 +1770,7 @@
           ctx.fill();
         }
         ctx.globalAlpha = player.invuln > 0 ? 0.26 : 0.18;
-        ctx.strokeStyle = "#55dbc1";
+        ctx.strokeStyle = player.color;
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(player.x, player.y, player.r * 1.72, 0, TWO_PI);
@@ -1129,7 +1783,7 @@
           angle = elapsed * 4.4 + (i / player.orbitCount) * TWO_PI;
           x = player.x + Math.cos(angle) * player.orbitRadius;
           y = player.y + Math.sin(angle) * player.orbitRadius;
-          ctx.strokeStyle = "#55dbc1";
+          ctx.strokeStyle = player.color;
           ctx.globalAlpha = 0.84;
           ctx.lineWidth = 5;
           ctx.beginPath();
@@ -1190,6 +1844,47 @@
             ctx.beginPath();
             ctx.arc(effect.x, effect.y, effect.r + (1 - t) * 46, 0, TWO_PI);
             ctx.stroke();
+          } else if (effect.type === "arc") {
+            ctx.strokeStyle = effect.color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(effect.x, effect.y);
+            ctx.quadraticCurveTo(
+              (effect.x + effect.x2) * 0.5 + Math.sin(titlePulse * 20) * 16,
+              (effect.y + effect.y2) * 0.5 - 28,
+              effect.x2,
+              effect.y2
+            );
+            ctx.stroke();
+          } else if (effect.type === "lotus") {
+            ctx.strokeStyle = effect.color;
+            ctx.fillStyle = "rgba(255,125,145,0.12)";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(effect.x, effect.y, effect.r * (1.02 - t * 0.12), 0, TWO_PI);
+            ctx.fill();
+            ctx.stroke();
+            ctx.globalAlpha = t * 0.62;
+            for (var petal = 0; petal < 6; petal += 1) {
+              ctx.save();
+              ctx.translate(effect.x, effect.y);
+              ctx.rotate(petal * TWO_PI / 6 + titlePulse * 0.8);
+              ctx.beginPath();
+              ctx.ellipse(effect.r * 0.34, 0, effect.r * 0.18, effect.r * 0.07, 0, 0, TWO_PI);
+              ctx.fill();
+              ctx.restore();
+            }
+          } else if (effect.type === "bossPulse") {
+            ctx.strokeStyle = effect.color;
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(effect.x, effect.y, effect.r + (1 - t) * 120, 0, TWO_PI);
+            ctx.stroke();
+            ctx.globalAlpha = t * 0.18;
+            ctx.fillStyle = effect.color;
+            ctx.beginPath();
+            ctx.arc(effect.x, effect.y, effect.r + (1 - t) * 80, 0, TWO_PI);
+            ctx.fill();
           } else {
             ctx.fillStyle = effect.color;
             ctx.beginPath();
@@ -1214,6 +1909,9 @@
         ctx.fillText(padTime(elapsed), width * 0.5, top + 6);
         ctx.textAlign = "right";
         ctx.fillText(kills + " 斩", width - 16, top + 6);
+        ctx.fillStyle = player.color;
+        ctx.font = "800 11px system-ui, sans-serif";
+        ctx.fillText(player.characterName, width - 16, top + 24);
         ctx.restore();
 
         addButton("pause", width - 56, top + 28, 42, 34, "Ⅱ", function () {
@@ -1237,41 +1935,214 @@
       }
 
       function drawTitle() {
+        var contentY;
         shade();
+        drawTitleHeader();
+        contentY = drawMenuTabs();
+        if (menuTab === "heroes") {
+          drawHeroMenu(contentY);
+        } else if (menuTab === "rank") {
+          drawLeaderboardMenu(contentY);
+        } else if (menuTab === "codex") {
+          drawCodexMenu(contentY);
+        } else {
+          drawHomeMenu(contentY);
+        }
+        drawHealthAdvisory();
+      }
+
+      function drawTitleHeader() {
+        var hero = getCharacter(selectedCharacterId);
         ctx.save();
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillStyle = "#f7e7bf";
-        ctx.font = "900 " + Math.min(46, width * 0.12) + "px system-ui, sans-serif";
-        ctx.fillText("影刃花海", width * 0.5, height * 0.26);
+        ctx.font = "900 " + Math.min(42, width * 0.11) + "px system-ui, sans-serif";
+        ctx.fillText("影刃花海", width * 0.5, height * 0.105);
         ctx.strokeStyle = "rgba(85,219,193,0.36)";
         ctx.lineWidth = 1.5;
-        ctx.strokeText("影刃花海", width * 0.5, height * 0.26);
+        ctx.strokeText("影刃花海", width * 0.5, height * 0.105);
+        ctx.font = "700 13px system-ui, sans-serif";
+        ctx.fillStyle = "rgba(245,234,209,0.76)";
+        ctx.fillText("当前出战 · " + hero.name + " / " + hero.title, width * 0.5, height * 0.155);
+        ctx.restore();
+      }
 
-        if (highScore.score > 0) {
-          ctx.font = "600 14px system-ui, sans-serif";
-          ctx.fillStyle = "rgba(245,234,209,0.78)";
-          ctx.fillText("最佳 " + padTime(highScore.time) + " · " + highScore.kills + "斩 · " + highScore.score, width * 0.5, height * 0.34);
-        }
-        if (platform.wasSidebarLaunch && platform.wasSidebarLaunch()) {
-          badge(width * 0.5 - 58, height * 0.38, 116, 26, "侧栏祝福");
-        }
+      function drawHealthAdvisory() {
+        ctx.save();
+        ctx.textAlign = "center";
         ctx.font = "600 10px system-ui, sans-serif";
         ctx.fillStyle = "rgba(245,234,209,0.58)";
         ctx.fillText("健康游戏忠告：适度游戏益脑，沉迷游戏伤身。", width * 0.5, height - 34);
         ctx.fillText("合理安排时间，享受健康生活。", width * 0.5, height - 20);
         ctx.restore();
+      }
 
-        addButton("start", width * 0.5 - 82, height * 0.68, 164, 48, "开局", function () {
+      function drawMenuTabs() {
+        var left = 14;
+        var gap = 6;
+        var tabW = (width - left * 2 - gap * (MENU_TABS.length - 1)) / MENU_TABS.length;
+        var tabY = Math.max(122, height * 0.19);
+        var i;
+        var tab;
+        for (i = 0; i < MENU_TABS.length; i += 1) {
+          tab = MENU_TABS[i];
+          addButton("tab-" + tab.id, left + i * (tabW + gap), tabY, tabW, 34, tab.label, (function (id) {
+            return function () {
+              menuTab = id;
+            };
+          })(tab.id), menuTab === tab.id ? "primary" : "secondary");
+        }
+        return tabY + 48;
+      }
+
+      function drawHomeMenu(y) {
+        var hero = getCharacter(selectedCharacterId);
+        var cardW = Math.min(328, width - 36);
+        var x = width * 0.5 - cardW * 0.5;
+        var textW = cardW - 128;
+        drawPanel(x, y, cardW, 178);
+        ctx.save();
+        ctx.fillStyle = "#f7e7bf";
+        ctx.font = "900 19px system-ui, sans-serif";
+        ctx.fillText(hero.name + " · " + hero.title, x + 18, y + 18);
+        ctx.fillStyle = "rgba(245,234,209,0.72)";
+        ctx.font = "600 13px system-ui, sans-serif";
+        drawWrappedText(hero.desc, x + 18, y + 48, textW, 18);
+        ctx.fillStyle = hero.color;
+        ctx.font = "800 13px system-ui, sans-serif";
+        drawWrappedText(hero.perk, x + 18, y + 98, textW, 18);
+        if (highScore.score > 0) {
+          ctx.fillStyle = "rgba(245,234,209,0.78)";
+          ctx.font = "700 13px system-ui, sans-serif";
+          ctx.fillText("最佳 " + padTime(highScore.time || 0) + " · " + (highScore.kills || 0) + "斩 · " + highScore.score, x + 18, y + 142);
+        }
+        ctx.restore();
+        drawGroundShadow(x + cardW - 62, y + 126, 78, 18, 0.32);
+        drawImageSprite(hero.sprite || "hero", x + cardW - 62, y + 96, 104, Math.sin(titlePulse * 3.8) * 0.025, 0.96, false);
+
+        if (platform.wasSidebarLaunch && platform.wasSidebarLaunch()) {
+          badge(width * 0.5 - 58, y + 190, 116, 26, "侧栏祝福");
+        }
+
+        addButton("start", width * 0.5 - 92, y + 228, 184, 48, "开局", function () {
           resetRun();
         }, "primary");
 
+        addButton("hero-tab", width * 0.5 - 92, y + 286, 88, 40, "换人", function () {
+          menuTab = "heroes";
+        }, "secondary");
+        addButton("rank-tab", width * 0.5 + 4, y + 286, 88, 40, "排行", function () {
+          menuTab = "rank";
+        }, "secondary");
+
         if (platform.canSidebar && platform.canSidebar()) {
-          addButton("sidebar", width * 0.5 - 82, height * 0.68 + 58, 164, 42, "侧栏加成", function () {
+          addButton("sidebar", width * 0.5 - 92, y + 336, 184, 38, "侧栏加成", function () {
             if (platform.openSidebar) {
               platform.openSidebar();
             }
           }, "secondary");
+        }
+      }
+
+      function drawHeroMenu(y) {
+        var cardW = Math.min(330, width - 28);
+        var cardH = 92;
+        var x = width * 0.5 - cardW * 0.5;
+        var i;
+        var hero;
+        var cy;
+        for (i = 0; i < CHARACTERS.length; i += 1) {
+          hero = CHARACTERS[i];
+          cy = y + i * (cardH + 10);
+          addButton("select-" + hero.id, x, cy, cardW, cardH, "", (function (id) {
+            return function () {
+              saveSelectedCharacter(id);
+            };
+          })(hero.id), "card");
+          ctx.save();
+          ctx.fillStyle = selectedCharacterId === hero.id ? hero.color : "#f7e7bf";
+          ctx.font = "900 17px system-ui, sans-serif";
+          ctx.fillText(hero.name + " · " + hero.title, x + 16, cy + 14);
+          ctx.fillStyle = "rgba(245,234,209,0.7)";
+          ctx.font = "600 12px system-ui, sans-serif";
+          drawWrappedText(hero.desc, x + 16, cy + 40, cardW - 118, 16);
+          drawGroundShadow(x + cardW - 50, cy + 72, 54, 12, 0.24);
+          drawImageSprite(hero.sprite || "hero", x + cardW - 50, cy + 48, 72, Math.sin(titlePulse * 4 + i) * 0.02, selectedCharacterId === hero.id ? 1 : 0.76, false);
+          ctx.textAlign = "right";
+          ctx.fillStyle = selectedCharacterId === hero.id ? "#ffd36b" : "rgba(245,234,209,0.52)";
+          ctx.font = "900 13px system-ui, sans-serif";
+          ctx.fillText(selectedCharacterId === hero.id ? "已选择" : "选择", x + cardW - 16, cy + 35);
+          ctx.restore();
+        }
+        addButton("hero-start", width * 0.5 - 92, y + CHARACTERS.length * (cardH + 10) + 8, 184, 44, "以此角色开局", function () {
+          resetRun();
+        }, "primary");
+      }
+
+      function drawLeaderboardMenu(y) {
+        var cardW = Math.min(330, width - 28);
+        var x = width * 0.5 - cardW * 0.5;
+        var i;
+        var rowY;
+        var record;
+        drawPanel(x, y, cardW, Math.min(378, height - y - 58));
+        ctx.save();
+        ctx.fillStyle = "#f7e7bf";
+        ctx.font = "900 18px system-ui, sans-serif";
+        ctx.fillText("本地排行榜", x + 16, y + 16);
+        ctx.font = "600 12px system-ui, sans-serif";
+        ctx.fillStyle = "rgba(245,234,209,0.58)";
+        ctx.fillText("按分数排序，记录角色、时间和击杀。", x + 16, y + 40);
+        for (i = 0; i < Math.max(leaderboard.length, 5); i += 1) {
+          rowY = y + 70 + i * 48;
+          if (i >= 6) {
+            break;
+          }
+          record = leaderboard[i];
+          ctx.fillStyle = i === 0 ? "#ffd36b" : "#f7e7bf";
+          ctx.font = "900 15px system-ui, sans-serif";
+          ctx.fillText((i + 1) + ".", x + 18, rowY);
+          if (record) {
+            ctx.fillText(record.score, x + 50, rowY);
+            ctx.fillStyle = "rgba(245,234,209,0.7)";
+            ctx.font = "600 12px system-ui, sans-serif";
+            ctx.fillText((record.characterName || "影刃") + " · " + padTime(record.time || 0) + " · " + (record.kills || 0) + "斩 · Lv " + (record.level || 1), x + 50, rowY + 19);
+          } else {
+            ctx.fillStyle = "rgba(245,234,209,0.42)";
+            ctx.font = "600 13px system-ui, sans-serif";
+            ctx.fillText("等待一次出战记录", x + 50, rowY + 5);
+          }
+        }
+        ctx.restore();
+      }
+
+      function drawCodexMenu(y) {
+        var cardW = Math.min(330, width - 28);
+        var cardH = 58;
+        var x = width * 0.5 - cardW * 0.5;
+        var i;
+        var type;
+        var config;
+        var cy;
+        for (i = 0; i < ENEMY_ORDER.length; i += 1) {
+          type = ENEMY_ORDER[i];
+          config = getEnemyConfig(type);
+          cy = y + i * (cardH + 8);
+          if (cy > height - 76) {
+            break;
+          }
+          drawPanel(x, cy, cardW, cardH);
+          ctx.save();
+          ctx.fillStyle = config.edge;
+          ctx.font = "900 14px system-ui, sans-serif";
+          ctx.fillText(config.name + " · " + config.tier, x + 14, cy + 12);
+          ctx.fillStyle = "rgba(245,234,209,0.68)";
+          ctx.font = "600 11px system-ui, sans-serif";
+          drawWrappedText(config.desc, x + 14, cy + 34, cardW - 92, 14);
+          ctx.restore();
+          drawGroundShadow(x + cardW - 40, cy + 48, 42, 9, 0.2);
+          drawImageSprite(config.sprite || "ash", x + cardW - 40, cy + 31, type === "boss" ? 62 : 54, Math.sin(titlePulse * 4.5 + i) * 0.03, 0.92, false);
         }
       }
 
@@ -1381,6 +2252,36 @@
         ctx.textBaseline = "middle";
         ctx.fillText(label, x + w * 0.5, y + h * 0.5);
         ctx.restore();
+      }
+
+      function drawPanel(x, y, w, h) {
+        ctx.save();
+        ctx.fillStyle = "rgba(12,17,15,0.82)";
+        ctx.strokeStyle = "rgba(255,211,107,0.26)";
+        ctx.lineWidth = 1;
+        roundRect(x, y, w, h, 8);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawWrappedText(text, x, y, maxWidth, lineHeight) {
+        var line = "";
+        var i;
+        var test;
+        for (i = 0; i < text.length; i += 1) {
+          test = line + text.charAt(i);
+          if (ctx.measureText(test).width > maxWidth && line) {
+            ctx.fillText(line, x, y);
+            line = text.charAt(i);
+            y += lineHeight;
+          } else {
+            line = test;
+          }
+        }
+        if (line) {
+          ctx.fillText(line, x, y);
+        }
       }
 
       function addButton(id, x, y, w, h, label, action, style) {
@@ -1534,8 +2435,18 @@
         if (!down) {
           return;
         }
-        if (state === "title" && (normalized === "Enter" || normalized === " ")) {
-          resetRun();
+        if (state === "title") {
+          if (normalized === "Enter" || normalized === " ") {
+            resetRun();
+          } else if (normalized === "1") {
+            menuTab = "home";
+          } else if (normalized === "2") {
+            menuTab = "heroes";
+          } else if (normalized === "3") {
+            menuTab = "rank";
+          } else if (normalized === "4") {
+            menuTab = "codex";
+          }
         } else if (state === "running" && normalized === "Escape") {
           state = "paused";
         } else if (state === "paused" && (normalized === "Escape" || normalized === " ")) {
@@ -1587,6 +2498,7 @@
         enemies = [];
         gems = [];
         projectiles = [];
+        enemyProjectiles = [];
         effects = [];
         player = null;
         elapsed = 0;
