@@ -4,6 +4,7 @@
 
 - 网页游戏已完成，可静态托管。
 - GitHub Pages workflow 已配置为发布 `npm run build:site` 生成的静态站点。
+- 服务器已发布到：`http://101.132.103.55/shadow-blade-rogue/`。
 - 抖音小游戏工程已完成基础结构检查。
 - 抖音审核资料草案在 `douyin-minigame/REVIEW_MATERIALS.md`。
 - 600x600 图标在 `douyin-minigame/assets/icon-600.png`。
@@ -38,6 +39,14 @@ npm run build:site
 
 ```bash
 rsync -avz --delete dist/ <ssh-user>@<server-ip>:/www/wwwroot/<your-domain>/
+```
+
+当前服务器使用 Nginx 路径发布：
+
+```text
+URL: http://101.132.103.55/shadow-blade-rogue/
+Path: /var/www/shadow-blade-rogue
+Nginx: /etc/nginx/sites-available/si-ze-huo-xian
 ```
 
 ## 抖音小游戏

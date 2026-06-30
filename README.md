@@ -39,6 +39,14 @@ npm run build:site
 
 把本目录提交到 GitHub 仓库的 `main` 分支，然后在仓库 Settings -> Pages 里选择 GitHub Actions。仓库会使用 `.github/workflows/pages.yml` 自动部署静态站点。
 
+## 服务器发布
+
+当前服务器发布地址：
+
+```text
+http://101.132.103.55/shadow-blade-rogue/
+```
+
 ## 抖音小游戏发布
 
 抖音小游戏 AppID 已写入 `douyin-minigame/project.config.json`：`tt3daf4b12a3cb79d702`。用抖音开发者工具导入 `douyin-minigame/` 后，上传体验版并在抖音开放平台完成资料、资质、自查、备案/ICP备案、版本审核和最终发布。
