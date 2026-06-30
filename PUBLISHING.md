@@ -4,6 +4,8 @@
 
 - 网页游戏已完成，可静态托管。
 - GitHub Pages workflow 已配置为发布 `npm run build:site` 生成的静态站点。
+- GitHub 仓库已发布到：`https://github.com/xiaokai2810/shadow-blade-rogue`。
+- GitHub Pages 已发布到：`https://xiaokai2810.github.io/shadow-blade-rogue/`。
 - 服务器已发布到：`http://101.132.103.55/shadow-blade-rogue/`。
 - 抖音小游戏工程已完成基础结构检查。
 - 抖音审核资料草案在 `douyin-minigame/REVIEW_MATERIALS.md`。
@@ -23,6 +25,13 @@ git push -u origin main
 ```
 
 推送后，到仓库 Settings -> Pages，把 Build and deployment 的 Source 设为 GitHub Actions。
+
+当前线上地址：
+
+```text
+Repo:  https://github.com/xiaokai2810/shadow-blade-rogue
+Pages: https://xiaokai2810.github.io/shadow-blade-rogue/
+```
 
 ## 服务器静态部署
 

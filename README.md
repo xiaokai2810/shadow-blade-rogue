@@ -39,6 +39,18 @@ npm run build:site
 
 把本目录提交到 GitHub 仓库的 `main` 分支，然后在仓库 Settings -> Pages 里选择 GitHub Actions。仓库会使用 `.github/workflows/pages.yml` 自动部署静态站点。
 
+当前 GitHub 仓库：
+
+```text
+https://github.com/xiaokai2810/shadow-blade-rogue
+```
+
+当前 GitHub Pages 地址：
+
+```text
+https://xiaokai2810.github.io/shadow-blade-rogue/
+```
+
 ## 服务器发布
 
 当前服务器发布地址：
