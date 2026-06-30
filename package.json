@@ -1,0 +1,13 @@
+{
+  "name": "shadow-blade-rogue",
+  "version": "0.1.0",
+  "private": true,
+  "description": "影刃花海：无双割草肉鸽 Canvas 小游戏，含 GitHub Pages 与抖音小游戏工程。",
+  "scripts": {
+    "build:site": "rm -rf dist && mkdir -p dist && cp index.html styles.css .nojekyll dist/ && cp -R src dist/src && mkdir -p dist/assets/generated dist/assets/sprites && cp assets/generated/title-key-art.jpg dist/assets/generated/ && cp assets/sprites/*.png dist/assets/sprites/",
+    "serve": "python3 -m http.server 4174",
+    "serve:dist": "cd dist && python3 -m http.server 4174",
+    "check": "node --check src/blade-survivor.js && node --check src/web.js && node --check douyin-minigame/game.js && node /Users/orange/.codex/skills/publish-douyin-minigame/scripts/check_minigame_project.mjs douyin-minigame",
+    "set:douyin-appid": "node scripts/set-douyin-appid.mjs"
+  }
+}

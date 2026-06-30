@@ -1,0 +1,17 @@
+.DS_Store
+dist/
+*.zip
+
+# Generated QA/source art that is not loaded by the game.
+assets/generated/qa-*.png
+assets/generated/sprite-preview.png
+assets/generated/shadow-blade-sprite-sheet-*.png
+
+# Android local/build outputs.
+android-apk/.gradle/
+android-apk/build/
+android-apk/app/build/
+android-apk/local.properties
+android-apk/**/*.apk
+android-apk/**/*.aab
+android-apk/**/*.keystore

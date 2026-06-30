@@ -1,0 +1,13 @@
+{
+  "appid": "tt3daf4b12a3cb79d702",
+  "projectname": "shadow-blade-rogue",
+  "compileType": "game",
+  "miniprogramRoot": "./",
+  "setting": {
+    "es6": false,
+    "postcss": false,
+    "minified": false,
+    "urlCheck": true
+  },
+  "condition": {}
+}
