@@ -323,7 +323,8 @@
         x: 0,
         y: 0,
         vx: 0,
-        vy: 0
+        vy: 0,
+        buttonHandled: false
       };
 
       var player;
@@ -386,7 +387,7 @@
         } catch (err) {
           return [];
         }
-        if (!list || !list.length) {
+        if (!Array.isArray(list) || !list.length) {
           return [];
         }
         return list.slice(0, 10);
@@ -1870,7 +1871,7 @@
               ctx.translate(effect.x, effect.y);
               ctx.rotate(petal * TWO_PI / 6 + titlePulse * 0.8);
               ctx.beginPath();
-              ctx.ellipse(effect.r * 0.34, 0, effect.r * 0.18, effect.r * 0.07, 0, 0, TWO_PI);
+              ellipsePath(effect.r * 0.34, 0, effect.r * 0.18, effect.r * 0.07, 0);
               ctx.fill();
               ctx.restore();
             }
@@ -2086,32 +2087,33 @@
         var i;
         var rowY;
         var record;
-        drawPanel(x, y, cardW, Math.min(378, height - y - 58));
+        var panelH = Math.min(430, Math.max(282, height - y - 58));
+        var rowH = clamp((panelH - 64) / 10, 22, 34);
+        var scoreY;
         ctx.save();
+        drawPanel(x, y, cardW, panelH);
         ctx.fillStyle = "#f7e7bf";
         ctx.font = "900 18px system-ui, sans-serif";
         ctx.fillText("本地排行榜", x + 16, y + 16);
         ctx.font = "600 12px system-ui, sans-serif";
         ctx.fillStyle = "rgba(245,234,209,0.58)";
         ctx.fillText("按分数排序，记录角色、时间和击杀。", x + 16, y + 40);
-        for (i = 0; i < Math.max(leaderboard.length, 5); i += 1) {
-          rowY = y + 70 + i * 48;
-          if (i >= 6) {
-            break;
-          }
+        for (i = 0; i < 10; i += 1) {
+          rowY = y + 68 + i * rowH;
+          scoreY = rowY + (rowH <= 24 ? 3 : 0);
           record = leaderboard[i];
           ctx.fillStyle = i === 0 ? "#ffd36b" : "#f7e7bf";
-          ctx.font = "900 15px system-ui, sans-serif";
-          ctx.fillText((i + 1) + ".", x + 18, rowY);
+          ctx.font = "900 " + (rowH <= 24 ? 12 : 15) + "px system-ui, sans-serif";
+          ctx.fillText((i + 1) + ".", x + 18, scoreY);
           if (record) {
-            ctx.fillText(record.score, x + 50, rowY);
+            ctx.fillText(record.score, x + 50, scoreY);
             ctx.fillStyle = "rgba(245,234,209,0.7)";
-            ctx.font = "600 12px system-ui, sans-serif";
-            ctx.fillText((record.characterName || "影刃") + " · " + padTime(record.time || 0) + " · " + (record.kills || 0) + "斩 · Lv " + (record.level || 1), x + 50, rowY + 19);
+            ctx.font = "600 " + (rowH <= 24 ? 10 : 12) + "px system-ui, sans-serif";
+            ctx.fillText((record.characterName || "影刃") + " · " + padTime(record.time || 0) + " · " + (record.kills || 0) + "斩 · Lv " + (record.level || 1), x + 50, rowY + (rowH <= 24 ? 16 : 19));
           } else {
             ctx.fillStyle = "rgba(245,234,209,0.42)";
-            ctx.font = "600 13px system-ui, sans-serif";
-            ctx.fillText("等待一次出战记录", x + 50, rowY + 5);
+            ctx.font = "600 " + (rowH <= 24 ? 10 : 13) + "px system-ui, sans-serif";
+            ctx.fillText("等待一次出战记录", x + 50, rowY + (rowH <= 24 ? 8 : 5));
           }
         }
         ctx.restore();
@@ -2119,7 +2121,9 @@
 
       function drawCodexMenu(y) {
         var cardW = Math.min(330, width - 28);
-        var cardH = 58;
+        var gap = height < 620 ? 4 : 6;
+        var available = Math.max(ENEMY_ORDER.length * 34 + gap * (ENEMY_ORDER.length - 1), height - y - 58);
+        var cardH = clamp((available - gap * (ENEMY_ORDER.length - 1)) / ENEMY_ORDER.length, 34, 58);
         var x = width * 0.5 - cardW * 0.5;
         var i;
         var type;
@@ -2128,21 +2132,20 @@
         for (i = 0; i < ENEMY_ORDER.length; i += 1) {
           type = ENEMY_ORDER[i];
           config = getEnemyConfig(type);
-          cy = y + i * (cardH + 8);
-          if (cy > height - 76) {
-            break;
-          }
+          cy = y + i * (cardH + gap);
           drawPanel(x, cy, cardW, cardH);
           ctx.save();
           ctx.fillStyle = config.edge;
-          ctx.font = "900 14px system-ui, sans-serif";
-          ctx.fillText(config.name + " · " + config.tier, x + 14, cy + 12);
-          ctx.fillStyle = "rgba(245,234,209,0.68)";
-          ctx.font = "600 11px system-ui, sans-serif";
-          drawWrappedText(config.desc, x + 14, cy + 34, cardW - 92, 14);
+          ctx.font = "900 " + (cardH < 42 ? 11 : 14) + "px system-ui, sans-serif";
+          ctx.fillText(config.name + " · " + config.tier, x + 14, cy + (cardH < 42 ? 8 : 12));
+          if (cardH >= 42) {
+            ctx.fillStyle = "rgba(245,234,209,0.68)";
+            ctx.font = "600 11px system-ui, sans-serif";
+            drawWrappedText(config.desc, x + 14, cy + 34, cardW - 92, 14);
+          }
           ctx.restore();
-          drawGroundShadow(x + cardW - 40, cy + 48, 42, 9, 0.2);
-          drawImageSprite(config.sprite || "ash", x + cardW - 40, cy + 31, type === "boss" ? 62 : 54, Math.sin(titlePulse * 4.5 + i) * 0.03, 0.92, false);
+          drawGroundShadow(x + cardW - 40, cy + cardH - 8, 36, 8, 0.2);
+          drawImageSprite(config.sprite || "ash", x + cardW - 40, cy + cardH * 0.5, type === "boss" ? cardH * 1.14 : cardH * 0.98, Math.sin(titlePulse * 4.5 + i) * 0.03, 0.92, false);
         }
       }
 
@@ -2340,6 +2343,19 @@
         ctx.closePath();
       }
 
+      function ellipsePath(x, y, rx, ry, rotation) {
+        if (ctx.ellipse) {
+          ctx.ellipse(x, y, rx, ry, rotation || 0, 0, TWO_PI);
+          return;
+        }
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rotation || 0);
+        ctx.scale(rx, ry);
+        ctx.arc(0, 0, 1, 0, TWO_PI);
+        ctx.restore();
+      }
+
       function drawStick() {
         ctx.save();
         ctx.globalAlpha = 0.48;
@@ -2369,7 +2385,12 @@
       }
 
       function pointerStart(x, y, id) {
+        pointer.buttonHandled = false;
         if (runButton(x, y)) {
+          pointer.id = id;
+          pointer.down = true;
+          pointer.activeStick = false;
+          pointer.buttonHandled = true;
           return;
         }
         if (state !== "running") {
@@ -2399,6 +2420,10 @@
       }
 
       function pointerEnd(x, y, id) {
+        if (pointer.buttonHandled && (pointer.id === id || id === undefined)) {
+          pointerCancel(id);
+          return;
+        }
         if (pointer.down && pointer.id === id) {
           if (!pointer.activeStick) {
             runButton(x, y);
@@ -2416,6 +2441,7 @@
         pointer.id = null;
         pointer.down = false;
         pointer.activeStick = false;
+        pointer.buttonHandled = false;
         pointer.vx = 0;
         pointer.vy = 0;
       }
