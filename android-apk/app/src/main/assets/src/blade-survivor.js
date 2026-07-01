@@ -1972,10 +1972,12 @@
       function drawHealthAdvisory() {
         ctx.save();
         ctx.textAlign = "center";
-        ctx.font = "600 10px system-ui, sans-serif";
+        ctx.font = "600 9px system-ui, sans-serif";
         ctx.fillStyle = "rgba(245,234,209,0.58)";
-        ctx.fillText("健康游戏忠告：适度游戏益脑，沉迷游戏伤身。", width * 0.5, height - 34);
-        ctx.fillText("合理安排时间，享受健康生活。", width * 0.5, height - 20);
+        ctx.fillText("健康游戏忠告：抵制不良游戏，拒绝盗版游戏。", width * 0.5, height - 54);
+        ctx.fillText("注意自我保护，谨防受骗上当。", width * 0.5, height - 40);
+        ctx.fillText("适度游戏益脑，沉迷游戏伤身。", width * 0.5, height - 26);
+        ctx.fillText("合理安排时间，享受健康生活。", width * 0.5, height - 12);
         ctx.restore();
       }
 

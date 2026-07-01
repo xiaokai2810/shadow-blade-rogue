@@ -1,6 +1,6 @@
 var BladeSurvivor = require("./src/blade-survivor.js");
 
-var REVIEW_HEALTH_ADVISORY = "健康游戏忠告：适度游戏益脑，沉迷游戏伤身。合理安排时间，享受健康生活。";
+var REVIEW_HEALTH_ADVISORY = "健康游戏忠告：抵制不良游戏，拒绝盗版游戏。注意自我保护，谨防受骗上当。适度游戏益脑，沉迷游戏伤身。合理安排时间，享受健康生活。";
 var ttApi = typeof tt !== "undefined" ? tt : null;
 var canvas = ttApi && ttApi.createCanvas ? ttApi.createCanvas() : null;
 var sidebarAvailable = false;
